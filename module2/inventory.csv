@@ -1,0 +1,11 @@
+item,qty,size.h,size.w,size.uom,status
+canvas,100,28.0,35.5,cm,A
+journal,25,14.0,21.0,cm,A
+mat,85,27.9,35.5,cm,A
+mousepad,25,19.0,22.85,cm,P
+notebook,50,8.5,11.0,in,P
+paper,100,8.5,11.0,in,D
+planner,75,22.85,30.0,cm,D
+postcard,45,10.0,15.25,cm,A
+sketchbook,80,14.0,21.0,cm,A
+sketch pad,95,22.85,30.5,cm,A
