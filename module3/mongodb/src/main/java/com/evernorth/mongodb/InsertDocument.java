@@ -53,7 +53,7 @@ public class InsertDocument {
                 .forEach(collection::deleteOne);
 
         listCollection(collection);
-
+        mongoClient.close();
     }
 
     private static void listCollection(MongoCollection<Document> collection) {

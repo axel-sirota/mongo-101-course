@@ -67,7 +67,7 @@ public class QueryDocuments {
 
         explainResult = iterable.explain();
         System.out.println(explainResult.toJson(JsonWriterSettings.builder().indent(true).build()));
-
+        mongoClient.close();
     }
 
 }
