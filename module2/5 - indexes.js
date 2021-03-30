@@ -1,4 +1,4 @@
-/ First let's import data
+// First let's import data
 
 // mongoimport -c inventory -d {DATABASE}} --drop --type csv --headerline --uri "mongodb://{USERNAME}:{PASSWORD}@{HOSTNAME}:27017/{DATABASE}" inventory.csv
 
