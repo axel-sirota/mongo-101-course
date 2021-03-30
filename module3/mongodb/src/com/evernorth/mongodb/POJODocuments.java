@@ -1,22 +1,21 @@
 package com.evernorth.mongodb;
 
-import com.mongodb.client.FindIterable;
+import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.Indexes;
-import org.bson.Document;
-import org.bson.json.JsonWriterSettings;
+import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.codecs.pojo.PojoCodecProvider;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.Properties;
 
-import static com.mongodb.client.model.Filters.and;
-import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Filters.gt;
-import static com.mongodb.client.model.Filters.in;
+import static java.util.Arrays.asList;
+import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
+import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
 public class POJODocuments {
 
@@ -33,45 +32,41 @@ public class POJODocuments {
             e.printStackTrace();
         }
         MongoClient mongoClient = MongoClients.create(host);
-        MongoDatabase database = mongoClient.getDatabase(databaseName);
-        MongoCollection<Document> collection = database.getCollection("students");
 
-        collection.dropIndexes();
+//      To insert POJOs directly we need a Codec Registry
 
-        FindIterable<Document> iterable = collection.find(and(
-                        gt("age", 15),
-                        in("grade", "A", "B", "C"),
-                        eq("subject", "Mathematics")
-                ))
-                .projection(new Document("student_id", 1)
-                        .append("_id", 0)
-                        .append("grade", 1)
-                        .append("age", 1))
-                .sort(new Document("age", -1))
-                .limit(10);
+        CodecRegistry pojoCodecRegistry = fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
+                fromProviders(PojoCodecProvider.builder().automatic(true).build()));
 
-//        iterable.forEach(document -> System.out.println(document.toJson()));
 
-        Document explainResult = iterable.explain();
-        System.out.println(explainResult.toJson(JsonWriterSettings.builder().indent(true).build()));
+        MongoDatabase database = mongoClient.getDatabase(databaseName).withCodecRegistry(pojoCodecRegistry);
+        MongoCollection<Student> collection = database.getCollection("new_students", Student.class);
 
-//        Let's find a better time indexing subject, grade and age
+        collection.drop();
 
-        collection.createIndex(
-                Indexes.compoundIndex(
-                        Indexes.ascending("subject"),
-                        Indexes.ascending("grade"),
-                        Indexes.descending("age")
-                )
+        Student student = new Student(13, "Biology", "D", 16);
+        System.out.println("Original: " + student);
+        collection.insertOne(student);
+
+        // Person will now have an ObjectId
+        System.out.println("Mutated: " + student);
+
+        // get it (since it's the only one in there since we dropped the rest earlier on)
+        Student somebody = collection.find().first();
+        System.out.println("Found someone: " + somebody + "\n");
+
+        List<Student> students = asList(
+                new Student(13, "Literature", "A", 16),
+                new Student(13, "Mathematics", "E", 16),
+                new Student(13, "Chemistry", "B", 16)
         );
 
-        explainResult = iterable.explain();
-        System.out.println(explainResult.toJson(JsonWriterSettings.builder().indent(true).build()));
+        collection.insertMany(students);
 
-//        Much better! Let's drop the index!
-
-        collection.dropIndexes();
-
+        collection.find().forEach(System.out::println);
+        collection.drop();
+        mongoClient.close();
     }
 
 }
+
