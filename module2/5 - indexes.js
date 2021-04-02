@@ -1,8 +1,6 @@
 // First let's import data
 
-// mongoimport -c inventory -d {DATABASE}} --drop --type csv --headerline --uri "mongodb://{USERNAME}:{PASSWORD}@{HOSTNAME}:27017/{DATABASE}" inventory.csv
-
-mongoimport -c students -d axel-sirota --drop --type json --uri "mongodb://localhost:27017/axel-sirota" students.json
+// Import the datasets/students.json file and configure the schema.
 
 db.students.createIndex({student_id: 1})
 
